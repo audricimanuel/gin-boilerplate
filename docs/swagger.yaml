@@ -1,0 +1,41 @@
+definitions:
+  httputils.BaseMeta:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total_data:
+        type: integer
+      total_page:
+        type: integer
+    type: object
+  httputils.BaseResponse:
+    properties:
+      data: {}
+      error_message:
+        type: string
+      meta:
+        $ref: '#/definitions/httputils.BaseMeta'
+      status:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /example:
+    get:
+      consumes:
+      - application/json
+      description: '"Just an example"'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httputils.BaseResponse'
+      summary: Example API
+      tags:
+      - Example
+swagger: "2.0"

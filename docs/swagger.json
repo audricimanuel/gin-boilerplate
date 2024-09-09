@@ -1,0 +1,65 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/example": {
+            "get": {
+                "description": "\"Just an example\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Example"
+                ],
+                "summary": "Example API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httputils.BaseResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "httputils.BaseMeta": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total_data": {
+                    "type": "integer"
+                },
+                "total_page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "httputils.BaseResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error_message": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/httputils.BaseMeta"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}
