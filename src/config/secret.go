@@ -5,6 +5,10 @@ import "github.com/spf13/viper"
 func ViperBind() {
 	viper.BindEnv("ENV")
 
+	// Binding Swagger Auth
+	viper.BindEnv("SWAGGER_USERNAME")
+	viper.BindEnv("SWAGGER_PASSWORD")
+
 	// Binding Database
 	viper.BindEnv("DB_HOST")
 	viper.BindEnv("DB_USER")

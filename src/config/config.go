@@ -2,9 +2,11 @@ package config
 
 type (
 	Config struct {
-		Env        string     `mapstructure:"ENV"`
-		Host       Host       `mapstructure:",squash"`
-		DataSource DataSource `mapstructure:",squash"`
+		Env             string     `mapstructure:"ENV"`
+		SwaggerUsername string     `mapstructure:"SWAGGER_USERNAME"`
+		SwaggerPassword string     `mapstructure:"SWAGGER_PASSWORD"`
+		Host            Host       `mapstructure:",squash"`
+		DataSource      DataSource `mapstructure:",squash"`
 	}
 
 	Host struct {

@@ -24,22 +24,22 @@ func RegisterRouter(
 	setMiddlewareGlobal(mid, r)
 
 	// Swagger
-	r.Handle("GET", "/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.Handle("GET", "/swagger", func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	r.Handle("GET", "/docs/*any", mid.BasicAuth(cfg.SwaggerUsername, cfg.SwaggerPassword), ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.Handle("GET", "/docs", func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusMovedPermanently, "/docs/index.html")
 	})
 
-	r.Handle("GET", "/ping", func(ctx *gin.Context) {
+	r.GET("/ping", func(ctx *gin.Context) {
 		staticText := fmt.Sprintf("hello world: %s", cfg.Env)
 		ctx.JSON(http.StatusOK, gin.H{"message": staticText})
 	})
 
-	r.Handle("GET", "/example", exampleController.GetExample)
+	r.GET("/example", exampleController.GetExample)
 
 	return r
 }
 
-func setMiddlewareGlobal(mid *middleware.GoMiddleware, r *gin.Engine) {
+func setMiddlewareGlobal(mid middleware.GoMiddleware, r *gin.Engine) {
 	// Logger
 	r.Use(mid.LogRequest())
 

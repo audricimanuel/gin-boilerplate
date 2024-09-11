@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"gin-boilerplate/src/config"
@@ -10,10 +11,17 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+	"strings"
 )
 
 type (
-	GoMiddleware struct {
+	GoMiddleware interface {
+		LogRequest() gin.HandlerFunc
+		RecoverPanic() gin.HandlerFunc
+		BasicAuth(username, password string) gin.HandlerFunc
+	}
+
+	GoMiddlewareImpl struct {
 		Config config.Config
 	}
 )
@@ -25,13 +33,13 @@ const (
 	ParamQueryKeyword = "keyword"
 )
 
-func InitMiddleware(cfg config.Config) *GoMiddleware {
-	return &GoMiddleware{
+func InitMiddleware(cfg config.Config) GoMiddleware {
+	return &GoMiddlewareImpl{
 		Config: cfg,
 	}
 }
 
-func (m *GoMiddleware) LogRequest() gin.HandlerFunc {
+func (m *GoMiddlewareImpl) LogRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		requestLog := MapLogRequest(ctx)
 		fmt.Println(requestLog)
@@ -67,7 +75,7 @@ func ServerError(ctx *gin.Context, err error, code int) {
 	ctx.JSON(code, http.StatusText(code))
 }
 
-func (m *GoMiddleware) RecoverPanic() gin.HandlerFunc {
+func (m *GoMiddlewareImpl) RecoverPanic() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -75,6 +83,38 @@ func (m *GoMiddleware) RecoverPanic() gin.HandlerFunc {
 				ServerError(ctx, fmt.Errorf("%s", err), http.StatusInternalServerError)
 			}
 		}()
+
+		ctx.Next()
+	}
+}
+
+func (m *GoMiddlewareImpl) BasicAuth(username, password string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		auth := ctx.GetHeader("Authorization")
+		if auth == "" {
+			ctx.Header("WWW-Authenticate", `Basic realm="Restricted"`)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			return
+		}
+
+		// Decode the Base64 encoded auth string
+		parts := strings.SplitN(auth, " ", 2)
+		if len(parts) != 2 || parts[0] != "Basic" {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			return
+		}
+
+		decoded, err := base64.StdEncoding.DecodeString(parts[1])
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			return
+		}
+
+		userPass := strings.SplitN(string(decoded), ":", 2)
+		if len(userPass) != 2 || userPass[0] != username || userPass[1] != password {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			return
+		}
 
 		ctx.Next()
 	}
