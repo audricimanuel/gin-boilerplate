@@ -24,7 +24,7 @@ type (
 )
 
 // SetHttpResponse map response
-func SetHttpResponse(ctx *gin.Context, data interface{}, err errorutils.HttpError, meta *BaseMeta) {
+func SetHttpResponse(ctx *gin.Context, data interface{}, err error, meta *BaseMeta) {
 	var errMsg *string
 
 	statusCode, message := errorutils.GetStatusCode(err)
